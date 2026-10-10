@@ -16,7 +16,7 @@
     <!-- رأس الصفحة -->
     <header class="w-full max-w-4xl text-center mb-6">
         <h1 class="text-3xl md:text-4xl font-bold text-amber-400 mb-2">🎧 برنامج تدريب الاستماع (20 يوماً)</h1>
-        <p class="text-slate-400 text-sm md:text-base">برنامجك التدريبي اليومي (5 مقاطع لكل يوم) مع نظام متابعة واختبارات فهم فورية.</p>
+        <p class="text-slate-400 text-sm md:text-base">برنامجك التدريبي اليومي (5 مقاطع لكل يوم) مع نظام متابعة فورية.</p>
         
         <!-- شريط التقدم العام -->
         <div class="mt-4 bg-slate-800 p-4 rounded-2xl border border-slate-700 flex flex-col sm:flex-row justify-around items-center gap-2 text-sm">
@@ -96,17 +96,7 @@
                 programData[day].push({
                     id: lessonId,
                     title: `اليوم ${day} - المقطع ${lessonId}: تدريب الاستماع`,
-                    youtubeId: myChannelVideos[videoIndex],
-                    quiz: {
-                        question: `سؤال الفهم للمقطع ${lessonId} في اليوم ${day}: ما هي الخطوة الأنسب للتمرين الصوتي هنا؟`,
-                        options: [
-                            "التركيز على الفهم السماعي العام دون ترجمة حرفية", 
-                            "إيقاف الفيديو والبحث عن كل كلمة بحرفيتها", 
-                            "تجاهل النطق تماماً والاعتماد على قراءة النصوص", 
-                            "عدم التركيز نهائياً"
-                        ],
-                        correct: 0
-                    }
+                    youtubeId: myChannelVideos[videoIndex]
                 });
             }
         }
@@ -175,9 +165,6 @@
                                 <input type="checkbox" ${isCompleted ? 'checked' : ''} onchange="toggleLessonCompletion(${currentActiveDay},${lesson.id})" class="w-5 h-5 accent-amber-500 rounded cursor-pointer">
                                 <span class="text-sm font-medium text-slate-300">أتممت مشاهدة المقطع وتدريبه</span>
                             </label>
-                            <button onclick="openQuiz(${currentActiveDay},${lesson.id})" class="w-full sm:w-auto px-4 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold rounded-xl text-sm transition">
-                                📝 اختبار الفهم (سؤال تفاعلي)
-                            </button>
                         </div>
                     ` : `
                         <p class="text-xs text-slate-400 text-center py-4">أتمم المقطع السابق في هذا اليوم لفتح هذا الدرس.</p>
@@ -200,28 +187,6 @@
 
             localStorage.setItem('listening_program_progress', JSON.stringify(userProgress));
             renderApp();
-        }
-
-        function openQuiz(day, lessonId) {
-            const lesson = programData[day].find(l => l.id === lessonId);
-            const userChoice = prompt(`${lesson.quiz.question}\n\n1. ${lesson.quiz.options[0]}\n2. ${lesson.quiz.options[1]}\n3. ${lesson.quiz.options[2]}\n4. ${lesson.quiz.options[3]}\n\nأدخل رقم الإجابة الصحيحة (1-4):`);
-            
-            if (userChoice !== null && userChoice.trim() !== "") {
-                const selectedIndex = parseInt(userChoice.trim()) - 1;
-                if (selectedIndex === lesson.quiz.correct) {
-                    alert("إجابة صحيحة! أحسنت، تم تسجيل إنجاز المقطع 🌟");
-                    if (!userProgress[day]) {
-                        userProgress[day] = [];
-                    }
-                    if (!userProgress[day].includes(lessonId)) {
-                        userProgress[day].push(lessonId);
-                        localStorage.setItem('listening_program_progress', JSON.stringify(userProgress));
-                        renderApp();
-                    }
-                } else {
-                    alert("إجابة خاطئة، راجع المقطع مرة أخرى ثم أعد المحاولة.");
-                }
-            }
         }
 
         function resetData() {
