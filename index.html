@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎧 برنامج تدريب الاستماع اليومي - 20 يوماً</title>
+    <!-- تحميل Tailwind CSS للتصميم العصري -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Cairo', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col items-center p-4 md:p-8">
+
+    <!-- رأس الصفحة -->
+    <header class="w-full max-w-4xl text-center mb-6">
+        <h1 class="text-3xl md:text-4xl font-bold text-amber-400 mb-2">🎧 برنامج تدريب الاستماع (20 يوماً)</h1>
+        <p class="text-slate-400 text-sm md:text-base">برنامجك التدريبي اليومي (5 مقاطع لكل يوم) مع نظام متابعة واختبارات فهم فورية.</p>
+        
+        <!-- شريط التقدم العام -->
+        <div class="mt-4 bg-slate-800 p-4 rounded-2xl border border-slate-700 flex flex-col sm:flex-row justify-around items-center gap-2 text-sm">
+            <span>اليوم الحالي: <strong id="current-day-label" class="text-amber-400 text-base">اليوم 1</strong></span>
+            <span>المقاطع المنجزة اليوم: <strong id="daily-progress-text" class="text-emerald-400 text-base">0 / 5</strong></span>
+            <button onclick="resetData()" class="px-3 py-1 bg-rose-500/20 hover:bg-rose-500/30 text-rose-400 text-xs rounded-xl border border-rose-500/30 transition">إعادة ضبط البرنامج</button>
+        </div>
+    </header>
+
+    <!-- قائمة أيام التدريب (أزرار التنقل من 1 إلى 20) -->
+    <nav class="w-full max-w-4xl mb-6 overflow-x-auto pb-2 flex gap-2 scrollbar-thin">
+        <div id="days-nav" class="flex gap-2"></div>
+    </nav>
+
+    <!-- محتوى المقاطع للوقت الحالي -->
+    <main class="w-full max-w-4xl space-y-6" id="playlist-container">
+        <!-- يتم توليد الـ 5 مقاطع الخاصة باليوم المختار هنا -->
+    </main>
+
+    <!-- تذييل الصفحة -->
+    <footer class="mt-12 text-slate-500 text-xs text-center">
+        التطبيق جاهز كلياً للتشغيل على GitHub Pages 🚀
+    </footer>
+
+    <script>
+        // مصفوفة تحتوي على الـ 100 مقطع مرتبة (كل 5 مقاطع لليوم الواحد)
+        const myChannelVideos = [
+            // اليوم الأول
+            "J8EWSLZ36s0", "gBYnewP1MmY", "DLi2txV9IVc", "mqPgWweY1vA", "oeIUhjCyNDM",
+            // اليوم الثاني
+            "b_ka3-253h0", "tyN89pAw_JU", "BKNJxpdNAtY", "B21JO6v2E_M", "P_QtdNMFEx0",
+            // اليوم الثالث
+            "K9sRWHidjDk", "iVk7Ft6gl5w", "Lyzl720gahg", "RVY1S0QdOVw", "NRpPCtLnIdw",
+            // اليوم الرابع
+            "fNk6ZFK8NsI", "F7UYmA6A0Ns", "Yj9g5G9QyFs", "iSTlFeW-Z9M", "nIxrq48jgMA",
+            // اليوم الخامس
+            "_ytFZU1LqOk", "RiKtRSJiA-4", "TnE5Ke9OwP0", "mloKYA4U3G8", "IjFnVCZ-MWU",
+            // اليوم السادس
+            "KHEzudV202s", "wejsrFMA0Vo", "r0dOmo6_MOs", "6_Bb2MoFd5I", "8iQaVm5sdqQ",
+            // اليوم السابع
+            "-P5cjWSpGs0", "VLkZ1vuMfNw", "_P-OaguXXBM", "Rh-9S_z7_yQ", "wQj1VkqH5GU",
+            // اليوم الثامن
+            "kVF8KdLsY48", "IQh6izHb8nc", "DaMuj0kX7Vc", "3lLdwmTipjY", "gjnz5SWlofg",
+            // اليوم التاسع
+            "AocInehAUuU", "Rp14tB8IZaM", "6gZwHm72cek", "yB3FIP-RVEw", "7dbaRnVIdJA",
+            // اليوم العاشر
+            "VWN75zFy4bM", "rlbQ_IB1c5s", "YxeChajSVJk", "YTgrOVrkHSQ", "E32tJzXIHVg",
+            // اليوم الحادي عشر
+            "If9t274FYgc", "jHQVkhgj2O8", "u3nXNILArRI", "NBX5v1yrGy8", "YZVrlC7f7Cs",
+            // اليوم الثاني عشر
+            "dOx7KbOqFAI", "H4d1LaYvEpI", "Pi7o1X0Yfh8", "7V-WIL3Etg8", "Q6qlUT1PflA",
+            // اليوم الثالث عشر
+            "OxsoPXgQqjE", "pMjfgX36dxA", "zngBJsoQOac", "oE2IZvpOlGk", "vk3VeK8EA50",
+            // اليوم الرابع عشر
+            "LDI3bu54hck", "qM_Ns6MzCCw", "iF8keeeSs34", "A3vniCIp4RU", "TnYX8MKWjsk",
+            // اليوم الخامس عشر
+            "Ab2BBDr0ttw", "A7vbh1prWD8", "LCEISyVqJBE", "vULWf3Gxljg", "lpnZEf0oA-M",
+            // اليوم السادس عشر
+            "ERPglLEF8xs", "HkNr_239BG4", "LQIMJN7KJzg", "TEfLTDq9Td8", "FLjnK6r-BCg",
+            // اليوم السابع عشر
+            "yUt4MpeqTQA", "t53s1Q-5Esc", "bTXXK3_bdbA", "v6oVk9PmvOs", "thIDS8-XfrM",
+            // اليوم الثامن عشر
+            "DX_-vlgTCvM", "XY9tbs-usbA", "WVAgyqwFR94", "v4t0E3S1N1k", "NB4niBMWcOg",
+            // اليوم التاسع عشر
+            "1cPXQwonprA", "cJF4mqeHWps", "mZOCbgocyJs", "cQF7axbtfJs", "0I2I_j1uCJs",
+            // اليوم العشرين
+            "obslSxOHwd4", "b6qKzTonmL4", "R3s0J7ox3kk", "I3J67hIpD7I", "xgDbpjFiMS4"
+        ];
+
+        // توليد بيانات الـ 20 يوماً وتوزيع المقاطع (5 مقاطع لكل يوم تلقائياً)
+        const programData = {};
+        for (let day = 1; day <= 20; day++) {
+            programData[day] = [];
+            for (let lessonId = 1; lessonId <= 5; lessonId++) {
+                const videoIndex = ((day - 1) * 5 + (lessonId - 1)) % myChannelVideos.length;
+                
+                programData[day].push({
+                    id: lessonId,
+                    title: `اليوم ${day} - المقطع ${lessonId}: تدريب الاستماع`,
+                    youtubeId: myChannelVideos[videoIndex],
+                    quiz: {
+                        question: `سؤال الفهم للمقطع ${lessonId} في اليوم ${day}: ما هي الخطوة الأنسب للتمرين الصوتي هنا؟`,
+                        options: [
+                            "التركيز على الفهم السماعي العام دون ترجمة حرفية", 
+                            "إيقاف الفيديو والبحث عن كل كلمة بحرفيتها", 
+                            "تجاهل النطق تماماً والاعتماد على قراءة النصوص", 
+                            "عدم التركيز نهائياً"
+                        ],
+                        correct: 0
+                    }
+                });
+            }
+        }
+
+        // قراءة التقدم المحفوظ محلياً من المتصفح
+        let userProgress = JSON.parse(localStorage.getItem('listening_program_progress')) || {};
+        let currentActiveDay = parseInt(localStorage.getItem('listening_active_day')) || 1;
+
+        function renderApp() {
+            const navContainer = document.getElementById('days-nav');
+            navContainer.innerHTML = '';
+            
+            for (let d = 1; d <= 20; d++) {
+                const isSelected = d === currentActiveDay;
+                const dayCompletedCount = (userProgress[d] || []).length;
+                const isDayFullyCompleted = dayCompletedCount === 5;
+
+                const btn = document.createElement('button');
+                btn.className = `px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap transition-all border ${
+                    isSelected 
+                        ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-lg scale-105' 
+                        : (isDayFullyCompleted 
+                            ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/30' 
+                            : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700')
+                }`;
+                btn.innerHTML = `اليوم ${d} ${isDayFullyCompleted ? '✅' : ''}`;
+                btn.onclick = () => {
+                    currentActiveDay = d;
+                    localStorage.setItem('listening_active_day', currentActiveDay);
+                    renderApp();
+                };
+                navContainer.appendChild(btn);
+            }
+
+            document.getElementById('current-day-label').innerText = `اليوم ${currentActiveDay}`;
+            const currentDayCompletedList = userProgress[currentActiveDay] || [];
+            document.getElementById('daily-progress-text').innerText = `${currentDayCompletedList.length} / 5`;
+
+            const container = document.getElementById('playlist-container');
+            container.innerHTML = '';
+
+            const dayLessons = programData[currentActiveDay];
+
+            dayLessons.forEach((lesson, index) => {
+                const isCompleted = currentDayCompletedList.includes(lesson.id);
+                const isUnlocked = index === 0 || currentDayCompletedList.includes(dayLessons[index - 1].id);
+
+                const card = document.createElement('div');
+                card.className = `bg-slate-800 rounded-2xl p-5 border transition-all ${isUnlocked ? 'border-slate-700 shadow-lg' : 'border-slate-800 opacity-60 pointer-events-none'}`;
+                
+                card.innerHTML = `
+                    <div class="flex justify-between items-center mb-3">
+                        <h2 class="text-base md:text-lg font-bold text-slate-200">${lesson.title}</h2>
+                        <span class="px-3 py-1 text-xs rounded-full ${isCompleted ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'}">
+                            ${isCompleted ? '✅ تم الإنجاز' : (isUnlocked ? '📌 متاح للمشاهدة' : '🔒 مقفل')}
+                        </span>
+                    </div>
+
+                    ${isUnlocked ? `
+                        <div class="mb-4 overflow-hidden rounded-xl border border-slate-700">
+                            <iframe class="w-full h-52 md:h-72 rounded-xl" src="https://www.youtube.com/embed/${lesson.youtubeId}" title="${lesson.title}" allowfullscreen></iframe>
+                        </div>
+
+                        <div class="flex flex-col sm:flex-row justify-between items-center gap-3 mt-4 pt-3 border-t border-slate-700/50">
+                            <label class="flex items-center gap-2 cursor-pointer select-none">
+                                <input type="checkbox" ${isCompleted ? 'checked' : ''} onchange="toggleLessonCompletion(${currentActiveDay},${lesson.id})" class="w-5 h-5 accent-amber-500 rounded cursor-pointer">
+                                <span class="text-sm font-medium text-slate-300">أتممت مشاهدة المقطع وتدريبه</span>
+                            </label>
+                            <button onclick="openQuiz(${currentActiveDay},${lesson.id})" class="w-full sm:w-auto px-4 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold rounded-xl text-sm transition">
+                                📝 اختبار الفهم (سؤال تفاعلي)
+                            </button>
+                        </div>
+                    ` : `
+                        <p class="text-xs text-slate-400 text-center py-4">أتمم المقطع السابق في هذا اليوم لفتح هذا الدرس.</p>
+                    `}
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function toggleLessonCompletion(day, lessonId) {
+            if (!userProgress[day]) {
+                userProgress[day] = [];
+            }
+
+            if (userProgress[day].includes(lessonId)) {
+                userProgress[day] = userProgress[day].filter(id => id !== lessonId);
+            } else {
+                userProgress[day].push(lessonId);
+            }
+
+            localStorage.setItem('listening_program_progress', JSON.stringify(userProgress));
+            renderApp();
+        }
+
+        function openQuiz(day, lessonId) {
+            const lesson = programData[day].find(l => l.id === lessonId);
+            const userChoice = prompt(`${lesson.quiz.question}\n\n1. ${lesson.quiz.options[0]}\n2. ${lesson.quiz.options[1]}\n3. ${lesson.quiz.options[2]}\n4. ${lesson.quiz.options[3]}\n\nأدخل رقم الإجابة الصحيحة (1-4):`);
+            
+            if (userChoice !== null && userChoice.trim() !== "") {
+                const selectedIndex = parseInt(userChoice.trim()) - 1;
+                if (selectedIndex === lesson.quiz.correct) {
+                    alert("إجابة صحيحة! أحسنت، تم تسجيل إنجاز المقطع 🌟");
+                    if (!userProgress[day]) {
+                        userProgress[day] = [];
+                    }
+                    if (!userProgress[day].includes(lessonId)) {
+                        userProgress[day].push(lessonId);
+                        localStorage.setItem('listening_program_progress', JSON.stringify(userProgress));
+                        renderApp();
+                    }
+                } else {
+                    alert("إجابة خاطئة، راجع المقطع مرة أخرى ثم أعد المحاولة.");
+                }
+            }
+        }
+
+        function resetData() {
+            if (confirm("هل أنت متأكد من إعادة ضبط التقدم وحذف كل الإنجازات السابقة؟")) {
+                localStorage.removeItem('listening_program_progress');
+                localStorage.removeItem('listening_active_day');
+                userProgress = {};
+                currentActiveDay = 1;
+                renderApp();
+            }
+        }
+
+        window.onload = renderApp;
+    </script>
+</body>
+</html>
